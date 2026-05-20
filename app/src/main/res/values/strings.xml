@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">App</string>
+    <string name="how_was_your_experience">How was your experience?</string>
+    <string name="submit">SUBMIT</string>
+    <string name="bad">Bad</string>
+    <string name="rate_today_s_checkout_service">Rate today\'s checkout service</string>
+    <string name="good">Good</string>
+    <string name="needs_improvement">Needs Improvement</string>
+    <string name="DashboardAccess">Dashboard</string>
+    <string name="Dashboard">Dashboard</string>
+</resources>
