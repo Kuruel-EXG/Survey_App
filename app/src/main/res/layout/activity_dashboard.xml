@@ -15,11 +15,11 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Manager Dashboard"
-            android:textSize="28sp"
-            android:textStyle="bold"
+            android:layout_marginBottom="24dp"
+            android:text="Dashboard"
             android:textColor="#212529"
-            android:layout_marginBottom="24dp" />
+            android:textSize="28sp"
+            android:textStyle="bold" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -62,7 +62,7 @@
                 android:layout_height="60dp"
                 android:layout_weight="1"
                 android:layout_marginEnd="8dp"
-                android:text="SYNC NOW"
+                android:text="SYNC  NOW"
                 android:backgroundTint="#198754"
                 android:textColor="#FFFFFF" />
 

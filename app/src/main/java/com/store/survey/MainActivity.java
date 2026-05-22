@@ -142,6 +142,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void showPinDialog() {
+
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Staff Access Required");
         builder.setMessage("Enter dashboard security PIN:");
@@ -149,6 +150,22 @@ public class MainActivity extends AppCompatActivity {
         final EditText input = new EditText(this);
         input.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_VARIATION_PASSWORD);
         builder.setView(input);
+
+        builder.setPositiveButton("Confirm", (dialog, which) -> {
+            String enteredPin = input.getText().toString();
+            if (enteredPin.equals(Config.DASHBOARD_PIN)) {
+
+                try {
+                    stopLockTask();
+                } catch (IllegalStateException e) {
+                }
+
+                Intent intent = new Intent(MainActivity.this, DashboardActivity.class);
+                startActivity(intent);
+            } else {
+                Toast.makeText(MainActivity.this, "Invalid PIN. Access Denied.", Toast.LENGTH_SHORT).show();
+            }
+        });
 
         builder.setPositiveButton("Confirm", (dialog, which) -> {
             String enteredPin = input.getText().toString();
@@ -162,6 +179,49 @@ public class MainActivity extends AppCompatActivity {
 
         builder.setNegativeButton("Cancel", (dialog, which) -> dialog.cancel());
         builder.show();
+    }
+
+    private void enableFullscreenKioskMode() {
+        // Hide both the status bar and the navigation bar
+        androidx.core.view.WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
+        androidx.core.view.WindowInsetsControllerCompat controller =
+                new androidx.core.view.WindowInsetsControllerCompat(getWindow(), getWindow().getDecorView());
+
+        if (controller != null) {
+            // Hide system bars (status bar and navigation bar)
+            controller.hide(androidx.core.view.WindowInsetsCompat.Type.systemBars());
+
+            // Ensure bars stay hidden even if the user swipes on the screen edges
+            controller.setSystemBarsBehavior(
+                    androidx.core.view.WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        // Hide the navigation and status bars
+        enableFullscreenKioskMode();
+
+        // FIXED: Changed ANDROID_ACTIVITY_SERVICE to ACTIVITY_SERVICE
+        android.app.ActivityManager activityManager = (android.app.ActivityManager) getSystemService(ACTIVITY_SERVICE);
+
+        if (activityManager != null && activityManager.getLockTaskModeState() == android.app.ActivityManager.LOCK_TASK_MODE_NONE) {
+            try {
+                startLockTask();
+            } catch (IllegalArgumentException e) {
+                android.util.Log.e("KIOSK_MODE", "Lock task failed: " + e.getMessage());
+            }
+        }
+    }
+
+    @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+        super.onWindowFocusChanged(hasFocus);
+        if (hasFocus) {
+            enableFullscreenKioskMode();
+        }
     }
 
     @Override

@@ -3,8 +3,11 @@ package com.store.survey;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.widget.Button;
+import android.view.View;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.view.WindowCompat;
+import androidx.core.view.WindowInsetsCompat;
+import androidx.core.view.WindowInsetsControllerCompat;
 import com.example.app.R;
 
 public class SuccessActivity extends AppCompatActivity {
@@ -17,23 +20,59 @@ public class SuccessActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_success);
 
-        Button btnNewResponse = findViewById(R.id.btnNewResponse);
+        // Hide bars immediately on creation
+        enableFullscreenKioskMode();
 
-        // Explicit exit execution path
-        btnNewResponse.setOnClickListener(v -> exitScreen());
+        View btnNewResponse = findViewById(R.id.btnNewResponse);
+        View btnDone = findViewById(R.id.btnArrow);
 
-        // Kiosk Auto-Reset Logic: Automatically returns to survey after 4 seconds
+        if (btnNewResponse != null) {
+            btnNewResponse.setOnClickListener(v -> exitScreen());
+        }
+        if (btnDone != null) {
+            btnDone.setOnClickListener(v -> exitScreen());
+        }
+
         autoResetHandler = new Handler(Looper.getMainLooper());
         autoResetRunnable = this::exitScreen;
         autoResetHandler.postDelayed(autoResetRunnable, 4000);
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // Re-apply fullscreen whenever this screen comes to the foreground
+        enableFullscreenKioskMode();
+    }
+
+    @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+        super.onWindowFocusChanged(hasFocus);
+        // Force bars to stay hidden even if a dialog box opens or closes
+        if (hasFocus) {
+            enableFullscreenKioskMode();
+        }
+    }
+
+    private void enableFullscreenKioskMode() {
+        WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
+        WindowInsetsControllerCompat controller =
+                new WindowInsetsControllerCompat(getWindow(), getWindow().getDecorView());
+
+        if (controller != null) {
+            // Hide both the status bar and the navigation bar
+            controller.hide(WindowInsetsCompat.Type.systemBars());
+            // Prevent the bars from permanently reappearing when swiped
+            controller.setSystemBarsBehavior(
+                    WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
+        }
+    }
+
     private void exitScreen() {
-        // Remove pending delay callbacks to prevent duplicate thread triggers
         if (autoResetHandler != null && autoResetRunnable != null) {
             autoResetHandler.removeCallbacks(autoResetRunnable);
         }
-        finish(); // Destroys this view and drops back to MainActivity
+        finish();
     }
 
     @Override
